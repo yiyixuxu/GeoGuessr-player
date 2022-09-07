@@ -1,3 +1,24 @@
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
 
 
 """Base DataModule class and base Dataset class."""
@@ -36,7 +57,10 @@ def pil_loader_default(path: Union[str, Path]) -> Image.Image:
         return img.convert("RGB")
 
 def get_gps_default(img_name: Path):
-    return tuple(img_name.stem.split('_')[1:])
+    return {
+      'latitude': float(img_name.stem.split('_')[1]),
+      'longitude': float(img_name.stem.split('_')[2])
+    }
 
 
 class GPSBaseDataset(torch.utils.data.Dataset):

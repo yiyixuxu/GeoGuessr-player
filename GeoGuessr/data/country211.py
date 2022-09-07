@@ -1,14 +1,37 @@
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
 
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+## Note : Editing in your Google Drive, changes will persist.
+#############################################################
+
+from math import ceil
 import pytorch_lightning as pl
 
 from torchvision.datasets import Country211 as torch_Country211
 from torchvision import transforms
-import ml_collections
+from torch.utils.data import DataLoader
+import torch
 
 from typing import Callable 
-
+import ml_collections
 from pathlib import Path
 import os
+
 
 from .base import BaseDataModule, GPSBaseDataset
 from .util import get_files
@@ -41,8 +64,20 @@ class Country211(BaseDataModule):
             self.data_test = torch_Country211(self.data_dir, split='test',transform = self.transform)
 
 
+def FiveCrop_tranform(image):
+    image = transforms.Resize(256)(image)
+    crops = transforms.FiveCrop(224)(image)
+    crops_transformed = []
+    crop_transform = transforms.Compose(
+            [transforms.ToTensor(),transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225)),])
+    
+    for crop in crops:
+        crops_transformed.append(crop_transform(crop))
+    return torch.stack(crops_transformed, dim=0)
 
-class Country211_GPS(BaseDataModule):
+
+
+class Country211_GeoEstimation(BaseDataModule):
     """The Country211 Data Set 
      <https://github.com/openai/CLIP/blob/main/data/country211.md>_ from OpenAI.
 
@@ -54,8 +89,7 @@ class Country211_GPS(BaseDataModule):
 
     def __init__(self, config: ml_collections.ConfigDict):
         super().__init__(config)
-        self.transform = transforms.Compose([transforms.Resize((128,128)),transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
-        
+        self.transform = FiveCrop_tranform
     
 
     def parepare_data(self):
@@ -75,4 +109,12 @@ class Country211_GPS(BaseDataModule):
             img_paths_test = get_files(self.data_dir / self.dataset_name, extensions = self.extensions, folders=['test'])
 
             self.data_test = GPSBaseDataset(img_paths_test,transform = self.transform)
-
+    
+    def test_dataloader(self):
+        return DataLoader(
+            self.data_test,
+            shuffle=False,
+            batch_size=ceil(self.batch_size/5),
+            num_workers=self.num_workers,
+            pin_memory=self.on_gpu,
+        )
